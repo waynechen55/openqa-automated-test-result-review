@@ -204,61 +204,61 @@ def openqa_review_result(distri, version, build, groupid, arch):
             filehandler.write("Status %s\n\n" % openqa_review_status)
             filehandler.write("Summary:\n\n")
             ##### Failed by Product Issues ######
-            filehandler.write(" --Failed by Product Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_product) / openqa_testsuites_num), len(failed_product)))
+            filehandler.write("- Failed by Product Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_product) / openqa_testsuites_num), len(failed_product)))
             if len(failed_product) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_product:
-                    filehandler.write("   --%s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
+                    filehandler.write(" - %s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
             ##### Failed by Automation Issues #####
-            filehandler.write(" --Failed by Automation Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_automation) / openqa_testsuites_num), len(failed_automation)))
+            filehandler.write("- Failed by Automation Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_automation) / openqa_testsuites_num), len(failed_automation)))
             if len(failed_automation) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_automation:
-                    filehandler.write("   --%s   %s   %s\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
+                    filehandler.write(" - %s   %s   %s\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
             ##### Failed by Environment Issues #####
-            filehandler.write(" --Failed by Environment Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_environment) / openqa_testsuites_num), len(failed_environment)))
+            filehandler.write("- Failed by Environment Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_environment) / openqa_testsuites_num), len(failed_environment)))
             if len(failed_environment) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_environment:
-                    filehandler.write("   --%s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
+                    filehandler.write(" - %s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
             ##### Failed and Pending for Resolution #####
-            filehandler.write(" --Failed and Pending for Resolution (%.1f%%  %d in total):\n\n" % ((100 * len(failed_pending) / openqa_testsuites_num), len(failed_pending)))
+            filehandler.write("- Failed and Pending for Resolution (%.1f%%  %d in total):\n\n" % ((100 * len(failed_pending) / openqa_testsuites_num), len(failed_pending)))
             if len(failed_pending) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_pending:
-                    filehandler.write("   --%s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
+                    filehandler.write(" - %s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
             ##### Passed #####
-            filehandler.write(" --Passed (%.1f%%  %d in total):\n\n" % ((100 * len(passed_fully) / openqa_testsuites_num), len(passed_fully)))
+            filehandler.write("- Passed (%.1f%%  %d in total):\n\n" % ((100 * len(passed_fully) / openqa_testsuites_num), len(passed_fully)))
             if len(passed_fully) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in passed_fully:
-                    filehandler.write("   --%s\n\n" % mytestsuite)   
+                    filehandler.write(" - %s\n\n" % mytestsuite)   
             ##### Softfailed #####
-            filehandler.write(" --Softfailed (%.1f%%  %d in total):\n\n" % ((100 * len(passed_softfailed) / openqa_testsuites_num), len(passed_softfailed)))
+            filehandler.write("- Softfailed (%.1f%%  %d in total):\n\n" % ((100 * len(passed_softfailed) / openqa_testsuites_num), len(passed_softfailed)))
             if len(passed_softfailed) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in passed_softfailed:
-                    filehandler.write("   --%s\n\n" % mytestsuite)   
+                    filehandler.write(" - %s\n\n" % mytestsuite)   
             ##### In Progress #####
-            filehandler.write(" --In Progress (%.1f%%  %d in total):\n\n" % ((100 * len(failed_in_progress) / openqa_testsuites_num), len(failed_in_progress)))
+            filehandler.write("- In Progress (%.1f%%  %d in total):\n\n" % ((100 * len(failed_in_progress) / openqa_testsuites_num), len(failed_in_progress)))
             if len(failed_in_progress) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_in_progress:
-                    filehandler.write("   --%s\n\n" % mytestsuite)   
+                    filehandler.write(" - %s\n\n" % mytestsuite)   
             ##### Cancelled #####
-            filehandler.write(" --Cancelled (%.1f%%  %d in total):\n\n" % ((100 * len(failed_cancelled) / openqa_testsuites_num), len(failed_cancelled)))
+            filehandler.write("- Cancelled (%.1f%%  %d in total):\n\n" % ((100 * len(failed_cancelled) / openqa_testsuites_num), len(failed_cancelled)))
             if len(failed_cancelled) == 0:
-                filehandler.write("   --No exhibition till now\n\n") 
+                filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_cancelled:
-                    filehandler.write("   --%s\n\n" % mytestsuite)   
+                    filehandler.write(" - %s\n\n" % mytestsuite)   
         print ("Please check out review result at /home/openqa_review/openqa_review_result_%s_%s_build%s_%s_%s.txt" % (distri,version,build,groupid,arch)) 
         filehandler.close()
 
