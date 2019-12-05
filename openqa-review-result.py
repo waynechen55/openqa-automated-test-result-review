@@ -117,7 +117,7 @@ def openqa_review_result(distri, version, build, groupid, arch):
                                         for allas in alltds.findAll("a", {"class":"failedmodule"}):
                                             testsuite_failedmodule = allas.get_text()
                                             print (testsuite_failedmodule)
-                                            if re.match(".*guest_installation*", testsuite_failedmodule, re.I) or re.match(".*guest_upgrade*", testsuite_failedmodule, re.I) or re.match(".*host_upgrade_step*", testsuite_failedmodule, re.I) or re.match(".*guest_migration*", testsuite_failedmodule, re.I) or re.match(".*pvusb_run*", testsuite_failedmodule, re.I):
+                                            if re.match(".*hotplug*", testsuite_failedmodule, re.I) or re.match(".*virsh_external_snapshot*", testsuite_failedmodule, re.I) or re.match(".*virsh_internal_snapshot*", testsuite_failedmodule, re.I) or re.match(".*guest_installation*", testsuite_failedmodule, re.I) or re.match(".*guest_upgrade*", testsuite_failedmodule, re.I) or re.match(".*host_upgrade_step*", testsuite_failedmodule, re.I) or re.match(".*guest_migration*", testsuite_failedmodule, re.I) or re.match(".*pvusb_run*", testsuite_failedmodule, re.I):
                                                 a_failed_module_bug = 1
                                                 testsuite_triplet[2] = 'Product bug to be opened (Only Suggestion. Need further review.)'
                                                 break
