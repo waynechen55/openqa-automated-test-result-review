@@ -16,15 +16,16 @@ failed_in_progress = []
 failed_pending     = []
 passed_fully       = []
 passed_softfailed  = []
-openqa_url_prefix = "https://openqa.opensuse.org"
+openqa_url_prefix = "http://"
 openqa_log_filename  = "/home/openqa_review/autoinst_temp.txt"
 openqa_review_path      = "/home/openqa_review"
 openqa_review_status = ''
 openqa_testsuites_num = 0
 
-def openqa_review_result(distri, version, build, groupid, arch):
-    openqa_url_addr = "%s/tests/overview?distri=%s&version=%s&build=%s&groupid=%s" % (openqa_url_prefix,distri,version,build,groupid)
-    print (openqa_url_addr)
+def openqa_review_result(distri, version, build, groupid, arch ,server):
+    openqa_url = "%s%s" % (openqa_url_prefix,server)
+    openqa_url_group = "%s%s/tests/overview?distri=%s&version=%s&build=%s&groupid=%s" % (openqa_url_prefix,server,distri,version,build,groupid)
+    print (openqa_url_group)
 
     try:
         os.makedirs(openqa_review_path)
@@ -33,7 +34,7 @@ def openqa_review_result(distri, version, build, groupid, arch):
             raise
 
     try:
-        openqa_html_page = urlopen(openqa_url_addr)
+        openqa_html_page = urlopen(openqa_url_group)
     except HTTPError as e:
         print (e)
     if openqa_html_page is None:
@@ -49,7 +50,7 @@ def openqa_review_result(distri, version, build, groupid, arch):
                         if 'title' in allis.attrs:
                             testsuite_status = allis.attrs['title']
                             print (testsuite_status)
-                            if re.match("Done: failed", testsuite_status):
+                            if re.match("Done: failed", testsuite_status) or re.match(".*timeout.*", testsuite_status) or re.match("Done: parallel_failed", testsuite_status):
                                 testsuite_triplet = [testsuite_name, '', '']    
                                 for allas in alltds.findAll("a", {"class":"failedmodule"}):
                                     if 'data-async' in allas.attrs:
@@ -62,22 +63,28 @@ def openqa_review_result(distri, version, build, groupid, arch):
                                     if 'title' in allis.attrs:
                                         i_test_label_exist = 1
                                         testsuite_reference = allis.attrs['title']
-                                        if re.match(".*Bug referenced: bsc#*", testsuite_reference) or re.match(".*Bug referenced: poo#*", testsuite_reference) or re.match("Bug referenced: gh#.*", testsuite_reference):
+                                        if re.match(".*Bug referenced: bsc#*", testsuite_reference) or re.match(".*Bug referenced: boo#*", testsuite_reference) or re.match(".*Bug referenced: poo#*", testsuite_reference) or re.match("Bug referenced: gh#.*", testsuite_reference):
                                             testsuite_triplet[2] = testsuite_triplet[2] + testsuite_reference
                                         if re.match(".*comment available*", testsuite_reference):
                                             i_test_label_comment = 1
-                                            testsuite_comment_url  = openqa_url_prefix + allis.parent.attrs['href']
-                                            testsuite_comment_html = urlopen(testsuite_comment_url)
-                                            testsuite_comment      = BeautifulSoup(testsuite_comment_html, 'lxml')
-                                            for alldivs in testsuite_comment.findAll("div", {"class":"media-comment markdown"}):
-                                                for allps in alldivs.findAll("p"):
-                                                    testsuite_reference  = allps.get_text()
-                                                    testsuite_triplet[2] = testsuite_triplet[2] + testsuite_reference
+                                            testsuite_comment_url  = openqa_url + allis.parent.attrs['href']
+                                            try:
+                                                testsuite_comment_html = urlopen(testsuite_comment_url)
+                                            except HTTPError as e:
+                                                print (e)
+                                                testsuite_triplet[2] = testsuite_triplet[2] + " Open " + testsuite_comment_url + " failed."
+                                                pass
+                                            else:
+                                                testsuite_comment      = BeautifulSoup(testsuite_comment_html, 'lxml')
+                                                for alldivs in testsuite_comment.findAll("div", {"class":"media-comment markdown"}):
+                                                    for allps in alldivs.findAll("p"):
+                                                        testsuite_reference  = allps.get_text()
+                                                        testsuite_triplet[2] = testsuite_triplet[2] + testsuite_reference
                                 if i_test_label_exist == 1:
-                                        if re.match(".*Bug referenced: bsc#*", testsuite_triplet[2]):
+                                        if re.match(".*Bug referenced: bsc#*", testsuite_triplet[2]) or re.match(".*Bug referenced: boo#*", testsuite_triplet[2]):
                                             failed_product.append(testsuite_triplet)
                                             break
-                                        elif re.match(".*Bug referenced: poo#*", testsuite_triplet[2]) or re.match("Bug referenced: gh#.*", testsuite_triplet[2]):
+                                        elif re.match(".*Bug referenced: poo#*", testsuite_triplet[2]) or re.match("Bug referenced: gh#.*", testsuite_triplet[2]) or re.match(".*trello\.com.*", testsuite_triplet[2]):
                                             failed_automation.append(testsuite_triplet)
                                             break
                                         elif i_test_label_comment == 1:
@@ -89,7 +96,8 @@ def openqa_review_result(distri, version, build, groupid, arch):
                                     a_href_test_needle = 0
                                     a_href_test_exception = 0
                                     for allas in alltds.findAll("a", {"href":re.compile("/tests/[0-9]+$")}):
-                                        testsuite_url      = openqa_url_prefix + allas.attrs['href'] + '/file/autoinst-log.txt'
+                                        testsuite_url      = openqa_url + allas.attrs['href'] + '/file/autoinst-log.txt'
+                                        print (testsuite_url) 
                                         try:
                                             testsuite_html = urlopen(testsuite_url)
                                         except HTTPError as e:
@@ -99,16 +107,23 @@ def openqa_review_result(distri, version, build, groupid, arch):
                                             failed_pending.append(testsuite_triplet)
                                             break
                                         else:
-                                            testsuite_log      = BeautifulSoup(testsuite_html, 'lxml').get_text()
-                                            testsuite_log_file = open(openqa_log_filename, 'w')
-                                            testsuite_log_file.write(testsuite_log)
-                                            testsuite_log_file.close()
-                                            testsuite_log_file = open(openqa_log_filename, 'r')
-                                            for myline in testsuite_log_file:
-                                                if re.match("^.*no candidate needle with tag*", myline):
-                                                    a_href_test_needle = 1
-                                                    testsuite_triplet[2] = testsuite_triplet[2] + myline
-                                            testsuite_log_file.close()
+                                            try:
+                                                testsuite_log = BeautifulSoup(testsuite_html, 'lxml').get_text()
+                                            except Exception as e:
+                                                print (e)
+                                                testsuite_triplet[2] = "Read " + testsuite_url + " failed."
+                                                failed_pending.append(testsuite_triplet)
+                                                break
+                                            else:
+                                                testsuite_log_file = open(openqa_log_filename, 'w')
+                                                testsuite_log_file.write(testsuite_log)
+                                                testsuite_log_file.close()
+                                                testsuite_log_file = open(openqa_log_filename, 'r')
+                                                for myline in testsuite_log_file:
+                                                    if re.match("^.*no candidate needle with tag*", myline):
+                                                        a_href_test_needle = 1
+                                                        testsuite_triplet[2] = testsuite_triplet[2] + myline
+                                                testsuite_log_file.close()
                                     if (a_href_test_needle == 1 and a_href_test_exception == 0):
                                         failed_automation.append(testsuite_triplet)
                                         break
@@ -144,15 +159,22 @@ def openqa_review_result(distri, version, build, groupid, arch):
                                             failed_automation.append(testsuite_triplet)
                                             break
                                         elif re.match(".*comment available*", testsuite_reference):
-                                            testsuite_comment_url  = openqa_url_prefix + allis.parent.attrs['href']
-                                            testsuite_comment_html = urlopen(testsuite_comment_url)
-                                            testsuite_comment      = BeautifulSoup(testsuite_comment_html, 'lxml')
-                                            for alldivs in testsuite_comment.findAll("div", {"class":"media-comment markdown"}):
-                                                for allps in alldivs.findAll("p"):
-                                                    testsuite_reference  = allps.get_text()
-                                                    testsuite_triplet[2] = testsuite_triplet[2] + testsuite_reference
-                                            failed_environment.append(testsuite_triplet)
-                                            break
+                                            testsuite_comment_url  = openqa_url + allis.parent.attrs['href']
+                                            try:
+                                                testsuite_comment_html = urlopen(testsuite_comment_url)
+                                            except HTTPError as e:
+                                                print (e)
+                                                testsuite_triplet[2] = testsuite_triplet[2] + " Open " + testsuite_comment_url + " failed."
+                                                failed_environment.append(testsuite_triplet)
+                                                break
+                                            else:
+                                                testsuite_comment      = BeautifulSoup(testsuite_comment_html, 'lxml')
+                                                for alldivs in testsuite_comment.findAll("div", {"class":"media-comment markdown"}):
+                                                    for allps in alldivs.findAll("p"):
+                                                        testsuite_reference  = allps.get_text()
+                                                        testsuite_triplet[2] = testsuite_triplet[2] + testsuite_reference
+                                                failed_environment.append(testsuite_triplet)
+                                                break
                                         else:
                                             testsuite_triplet[2] = 'Incomplete might be caused by environment or automation issue. Need further review'
                                             failed_pending.append(testsuite_triplet)
@@ -163,10 +185,10 @@ def openqa_review_result(distri, version, build, groupid, arch):
                                     testsuite_triplet = [testsuite_name, '', 'Incomplete might be caused by environment or automation issue. Need further review']
                                     failed_pending.append(testsuite_triplet)
                                     break
-                            if re.match("Done: parallel_failed", testsuite_status):
-                                testsuite_triplet = [testsuite_name, '', 'Pending for review (parallel_failed)']
-                                failed_pending.append(testsuite_triplet)
-                                break
+                            #if re.match("Done: parallel_failed", testsuite_status):
+                            #    testsuite_triplet = [testsuite_name, '', 'Pending for review (parallel_failed)']
+                            #    failed_pending.append(testsuite_triplet)
+                            #    break
                             if re.match(".*cancelled*", testsuite_status):
                                 failed_cancelled.append(testsuite_name)
                                 break
@@ -209,7 +231,18 @@ def openqa_review_result(distri, version, build, groupid, arch):
                 filehandler.write(" - No exhibition till now\n\n") 
             else:
                 for mytestsuite in failed_product:
-                    filehandler.write(" - %s   %s   %s\n\n" % (mytestsuite[0],mytestsuite[1],mytestsuite[2]))   
+                    if (mytestsuite[2] != '' and (re.match(".*Bug referenced: bsc#*", mytestsuite[2]) or re.match(".*Bug referenced: boo#*", mytestsuite[2]))): 
+                        current_prodcut_bug = mytestsuite[2] 
+                        filehandler.write(" - %s\n\n" % (current_prodcut_bug))
+                        filehandler.write("     - %s   %s\n\n" % (mytestsuite[0],mytestsuite[1]))
+                        mytestsuite[2] = ''
+                        for mytestsuite_compared in failed_product:
+                            if (mytestsuite_compared[2] != '' and mytestsuite_compared[2] == current_prodcut_bug):
+                                filehandler.write("     - %s   %s\n\n" % (mytestsuite_compared[0],mytestsuite_compared[1]))
+                                mytestsuite_compared[2] = ''
+                for mytestsuite_nobug in failed_product:
+                    if (mytestsuite_nobug[2] != ''):
+                        filehandler.write(" - %s   %s   %s\n" % (mytestsuite_nobug[0],mytestsuite_nobug[1],mytestsuite_nobug[2]))   
             ##### Failed by Automation Issues #####
             filehandler.write("- Failed by Automation Issues (%.1f%%  %d in total):\n\n" % ((100 * len(failed_automation) / openqa_testsuites_num), len(failed_automation)))
             if len(failed_automation) == 0:
@@ -269,13 +302,13 @@ def main(argv):
     groupid_str = ''
     arch_str = ''
     try:
-        opts,args = getopt.getopt(argv,"hd:v:b:g:a:",["help","distri=","version=","build=","groupid=","arch="])
+        opts,args = getopt.getopt(argv,"hd:v:b:g:a:s:",["help","distri=","version=","build=","groupid=","arch=","server="])
     except getopt.GetoptError:
-        print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupip> -a <architecture>")
+        print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupip> -a <architecture> -s <openQA server(openqa.opensuse.org)>")
         sys.exit(2)
     for opt,arg in opts:
         if opt in ("-h", "--help"):
-           print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupip> -a <architecture")
+           print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupip> -a <architecture> -s <openQA server(openqa.opensuse.org)>")
            sys.exit()
         elif opt in ("-d", "--distribution"):
              distri_str = arg
@@ -287,12 +320,15 @@ def main(argv):
              groupid_str = arg
         elif opt in ("-a", "--arch"):
              arch_str = arg
+        elif opt in ("-s", "--server"):
+             server_str = arg
     print ("Distribution is", distri_str)
     print ("Version is", version_str)
     print ("Build is", build_str)
     print ("Groupid is", groupid_str)
     print ("Arch is", arch_str)
-    openqa_review_result(distri_str, version_str, build_str, groupid_str, arch_str)
+    print ("openQA server is", server_str)
+    openqa_review_result(distri_str, version_str, build_str, groupid_str, arch_str, server_str)
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+        main(sys.argv[1:])
