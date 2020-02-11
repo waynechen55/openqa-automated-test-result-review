@@ -301,6 +301,7 @@ def main(argv):
     build_str = ''
     groupid_str = ''
     arch_str = ''
+    server_str = ''
     try:
         opts,args = getopt.getopt(argv,"hd:v:b:g:a:s:",["help","distri=","version=","build=","groupid=","arch=","server="])
     except getopt.GetoptError:
