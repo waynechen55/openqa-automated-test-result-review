@@ -2,15 +2,11 @@
 This program gathers test results of openqa automated tests, and sorts all failed tests by their respective failures along with bug references, comments available, specific root causes or suggestions. It also supports post results onto openQA job group webpage automatically by using selenium
 
 # Usage
-##v1.0
-
+## v1.0
 openqa-review-result.py -d distribution -v version -b buildnumber -g groupip -a architecture
-
-##v2.0
+## v2.0
 openqa-review-result.py -d distribution -v version -b buildnumber -g groupip -a architecture -s openqa.opensuse.org 
-
-##v3.0
-
+## v3.0
 openqa-review-result.py -d distribution -v version -b buildnumber -g groupip -a architecture -s openqa.opensuse.org -p
 
 This program was initially developed for internal openQA. Because the common and identical website structure of openQA tool across sites in different locations and for different purposes, this program should also be effective and helpful. 
