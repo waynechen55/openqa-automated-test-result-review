@@ -3,29 +3,20 @@ This program gathers test results of openqa automated tests, and sorts all faile
 
 # Usage
 ##v1.0
+
 openqa-review-result.py -d distribution -v version -b buildnumber -g groupip -a architecture
+
 ##v2.0
 openqa-review-result.py -d distribution -v version -b buildnumber -g groupip -a architecture -s openqa.opensuse.org 
+
 ##v3.0
+
 openqa-review-result.py -d distribution -v version -b buildnumber -g groupip -a architecture -s openqa.opensuse.org -p
 
 This program was initially developed for internal openQA. Because the common and identical website structure of openQA tool across sites in different locations and for different purposes, this program should also be effective and helpful. 
 
 For example, openqa.opensuse.org can be accessed from everywhere:
 
-##v1.0
-"./openqa-review-result.py -d opensuse -v Tumbleweed -b 20190626 -g 1 -a x86_64" generates review summary for   
-https://openqa.opensuse.org/tests/overview?distri=opensuse&version=Tumbleweed&build=20190626&groupid=1 
-"./openqa-review-result.py -d microos -v Tumbleweed -b 20190626 -g 1 -a x86_64" generates review summary for
-https://openqa.opensuse.org/tests/overview?distri=microos&version=Tumbleweed&build=20190626&groupid=1
-
-##v2.0
-"./openqa-review-result.py -d opensuse -v Tumbleweed -b 20190626 -g 1 -a x86_64 -s openqa.opensuse.org" generates review summary for   
-https://openqa.opensuse.org/tests/overview?distri=opensuse&version=Tumbleweed&build=20190626&groupid=1 
-"./openqa-review-result.py -d microos -v Tumbleweed -b 20190626 -g 1 -a x86_64 -s openqa.opensuse.org" generates review summary for
-https://openqa.opensuse.org/tests/overview?distri=microos&version=Tumbleweed&build=20190626&groupid=1
-
-##v3.0
 "./openqa-review-result.py -d opensuse -v Tumbleweed -b 20190626 -g 1 -a x86_64 -s openqa.opensuse.org -p" generates review summary for   
 https://openqa.opensuse.org/tests/overview?distri=opensuse&version=Tumbleweed&build=20190626&groupid=1 
 "./openqa-review-result.py -d microos -v Tumbleweed -b 20190626 -g 1 -a x86_64 -s openqa.opensuse.org -p" generates review summary for
