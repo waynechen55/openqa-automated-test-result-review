@@ -184,18 +184,22 @@ func do_packages_comparison(current_build_number string, previous_build_number s
     var previous_packages_left []string
     for previous_file_scanner.Scan() {
         package_full_name := previous_file_scanner.Text()
-	re := regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
+	re := regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
+	//re := regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
         package_name := re.ReplaceAllString(package_full_name, "")
-	re = regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}")
+        re = regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}")
+	//re = regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}")
         package_versions := re.FindStringSubmatch(package_full_name)
 	package_version := package_versions[0]
 	found_package := "false"
 	var current_index int
 	var current_line string
 	for current_index, current_line = range current_file_TextLines {
-            re := regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
+	    re := regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
+            //re := regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
             current_package_name := re.ReplaceAllString(current_line, "")
-	    re = regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}")
+            re = regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}")
+	    //re = regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}")
             current_package_versions := re.FindStringSubmatch(current_line)
 	    current_package_version := current_package_versions[0]
 	    if package_name == current_package_name {
