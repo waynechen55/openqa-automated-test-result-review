@@ -315,13 +315,13 @@ def main(argv):
     server_str = ''
     post_str = 'false'
     try:
-        opts,args = getopt.getopt(argv,"hd:v:b:g:a:s:p",["help","distri=","version=","build=","groupid=","arch=","server=","post"])
+        opts,args = getopt.getopt(argv,"hd:v:b:g:a:s:pc",["help","distri=","version=","build=","groupid=","arch=","server=","post", "compare"])
     except getopt.GetoptError:
-        print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupip> -a <architecture> -s <openQA server(openqa.opensuse.org)> -p <post result onto openQA>")
+        print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupid> -a <architecture> -s <openQA server(openqa.opensuse.org)> -p <post result onto openQA> -c <compare the latest two builds>")
         sys.exit(2)
     for opt,arg in opts:
         if opt in ("-h", "--help"):
-           print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupip> -a <architecture> -s <openQA server(openqa.opensuse.org)> -p <post result onto openQA>")
+           print ("openqa-review-result.py -d <distribution> -v <version> -b <buildnumber> -g <groupid> -a <architecture> -s <openQA server(openqa.opensuse.org)> -p <post result onto openQA> -c <compare the latest two builds>")
            sys.exit()
         elif opt in ("-d", "--distribution"):
              distri_str = arg
@@ -336,7 +336,9 @@ def main(argv):
         elif opt in ("-s", "--server"):
              server_str = arg
         elif opt in ("-p", "--post"):
-             post_str = 'true' 
+             post_str = 'true'
+        elif opt in ("-c", "--compare"):
+             comp_str = 'true'
     print ("Distribution is", distri_str)
     print ("Version is", version_str)
     print ("Build is", build_str)
@@ -344,6 +346,7 @@ def main(argv):
     print ("Arch is", arch_str)
     print ("openQA server is", server_str)
     print ("Post result onto ", server_str, " is ", post_str)
+    print ("Compare the latest two builds on", server_str, " is ", comp_str)
     review_return = openqa_review_result(distri_str, version_str, build_str, groupid_str, arch_str, server_str)
     if (post_str == 'true' and review_return == 'OK'):
         openqa_url_group_overview = "%s%s/group_overview/%s" % (openqa_url_prefix_https,server_str,groupid_str)
@@ -352,5 +355,20 @@ def main(argv):
         PostReviewResult.post_onto_openQA(openqa_url_group_overview, post_review_result, build_str, arch_str)
     else:
         print ('You did not choose to post review result onto openQA or review function returns non-OK') 
+    if (comp_str == 'true'):
+        openqa_assets_url = "%s%s/assets/repo/%s-%s-Full-%s-Build%s-Media1/" % (openqa_url_prefix,server_str, distri_str.upper(), version_str.upper(), arch_str, build_str)
+        version_release = re.search('^(\d{1,})-.*$', version_str).group(1)
+        if int(version_release) >= 15:
+            baseurl = "%sModule-Basesystem/%s" % (openqa_assets_url, arch_str.lower())
+            legacyurl = "%sModule-Legacy/%s" % (openqa_assets_url, arch_str.lower())
+            serverurl = "%sModule-Server-Applications/%s" % (openqa_assets_url, arch_str.lower())
+            desktopurl = "%sModule-Desktop-Applications/%s" % (openqa_assets_url, arch_str.lower())
+            weburl = "%sModule-Web-Scripting/%s" % (openqa_assets_url, arch_str.lower())
+            devurl = "%sModule-Development-Tools/%s" % (openqa_assets_url, arch_str.lower())
+            golang_cmd = "/usr/bin/go run /home/waynechen/playground/Hackweek20/builds_comparison.go {0} {1} {2} {3} {4} {5}".format(baseurl, legacyurl, serverurl, desktopurl, weburl, devurl)
+            print ('Going to execute %s' % golang_cmd)
+            os.system(golang_cmd)
+    else:
+        print ('You did not choose to compare the latest two builds on openQA')
 if __name__ == "__main__":
         main(sys.argv[1:])
