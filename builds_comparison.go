@@ -70,9 +70,10 @@ func record_packages_in_file(allpackages []string,  allpackagesURL string) {
         fmt.Println("Folder /home/waynechen/openqa_review/ does not exist. Going to create it.\n")
 	mkdir_err := os.MkdirAll("/home/waynechen/openqa_review", 0777)
         check_error("/home/waynechen/openqa_review", mkdir_err)
+    } else if errors.Is(stat_dir_err, os.ErrExist) {
+        fmt.Println("Folder /home/waynechen/openqa_review/ already exists.\n")
     } else {
         check_error("/home/waynechen/openqa_review", stat_dir_err)
-        fmt.Println("Folder /home/waynechen/openqa_review/ already exists.\n")
     }
 
     if _, stat_file_err := os.Stat(allpackagesURL_name); errors.Is(stat_file_err, os.ErrNotExist) {
