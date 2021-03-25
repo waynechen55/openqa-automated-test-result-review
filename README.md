@@ -19,6 +19,8 @@ For example, openqa.opensuse.org can be accessed from everywhere:
 https://openqa.opensuse.org/tests/overview?distri=opensuse&version=Tumbleweed&build=20190626&groupid=1 
 "./openqa-review-result.py -d microos -v Tumbleweed -b 20190626 -g 1 -a x86_64 -s openqa.opensuse.org -p" generates review summary for
 https://openqa.opensuse.org/tests/overview?distri=microos&version=Tumbleweed&build=20190626&groupid=1
+## v4.0
+Use golang to do SLES builds comparison to achieve faster speed. This golang script is called inside by openqa-review-result.py by using os.system. User can use openqa-review-result.py with "-c" option to use this feature.
   
 # Future Development
 1. Any more advacned way to incorparate more delicate assortment and findings will be implemented along with the effort spent on generating such review summary and when time permits.
