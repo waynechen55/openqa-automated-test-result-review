@@ -314,6 +314,7 @@ def main(argv):
     arch_str = ''
     server_str = ''
     post_str = 'false'
+    comp_str = 'false'
     try:
         opts,args = getopt.getopt(argv,"hd:v:b:g:a:s:pc",["help","distri=","version=","build=","groupid=","arch=","server=","post", "compare"])
     except getopt.GetoptError:
