@@ -184,24 +184,28 @@ func do_packages_comparison(current_build_number string, previous_build_number s
     var previous_packages_left []string
     for previous_file_scanner.Scan() {
         package_full_name := previous_file_scanner.Text()
-	re := regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
+	re := regexp.MustCompile("((-([0-9|\\.]){1,}){1,}(([0-9|a-z|A-Z|\\.){1,}){0,}(_([0-9|\\.|a-z|A-Z]){0,}){0,}([\\+]{1,}.*){0,}){1,}(noarch|x86_64|aarch64|s390x)\\.rpm")
 	//re := regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
         package_name := re.ReplaceAllString(package_full_name, "")
-        re = regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}")
+        re = regexp.MustCompile("((-([0-9|\\.]){1,}){1,}(([0-9|a-z|A-Z|\\.){1,}){0,}(_([0-9|\\.|a-z|A-Z]){0,}){0,}([\\+]{1,}.*){0,}){1,}")
 	//re = regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}")
         package_versions := re.FindStringSubmatch(package_full_name)
 	package_version := package_versions[0]
+	re = regexp.MustCompile("(noarch|x86_64|aarch64|s390x)\\.rpm")
+	package_version = re.ReplaceAllString(package_version, "")
 	found_package := "false"
 	var current_index int
 	var current_line string
 	for current_index, current_line = range current_file_TextLines {
-	    re := regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
+	    re := regexp.MustCompile("((-([0-9|\\.]){1,}){1,}(([0-9|a-z|A-Z|\\.){1,}){0,}(_([0-9|\\.|a-z|A-Z]){0,}){0,}([\\+]{1,}.*){0,}){1,}(noarch|x86_64|aarch64|s390x)\\.rpm")
             //re := regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}(noarch|x86_64|aarch64|s390x)\\.rpm")
             current_package_name := re.ReplaceAllString(current_line, "")
-            re = regexp.MustCompile("(-([0-9|\\.]){1,}){0,2}(\\+.*){0,2}(-([0-9|\\.]){1,}){1,2}")
+            re = regexp.MustCompile("((-([0-9|\\.]){1,}){1,}(([0-9|a-z|A-Z|\\.){1,}){0,}(_([0-9|\\.|a-z|A-Z]){0,}){0,}([\\+]{1,}.*){0,}){1,}")
 	    //re = regexp.MustCompile("(-([0-9|\\.]){1,}){1,2}")
             current_package_versions := re.FindStringSubmatch(current_line)
 	    current_package_version := current_package_versions[0]
+	    re = regexp.MustCompile("(noarch|x86_64|aarch64|s390x)\\.rpm")
+	    current_package_version = re.ReplaceAllString(current_package_version, "")
 	    if package_name == current_package_name {
 		found_package = "true"
 		if package_version != current_package_version {
@@ -217,12 +221,22 @@ func do_packages_comparison(current_build_number string, previous_build_number s
 	    }
         }
 	if found_package == "true" {
-	    if  current_index == 0 {
+            if len(current_file_TextLines) == 1 {
+                current_file_TextLines = []string{}
+            }else if current_index == 0 {
                 current_file_TextLines = current_file_TextLines[1:]
-            }else if current_index == (len(current_file_TextLines) - 1) {
-	        current_file_TextLines = current_file_TextLines[:current_index-1]
-	    }else {
-	        current_file_TextLines = append(current_file_TextLines[:current_index-1], current_file_TextLines[current_index+1:]...)
+            }else if len(current_file_TextLines) - current_index - 1 == 0 {
+                if len(current_file_TextLines) > 2 {
+                    current_file_TextLines = current_file_TextLines[:current_index-1]
+                }else {
+                    current_file_TextLines = []string{current_file_TextLines[0]}
+                }
+            }else if current_index == 1 {
+                    current_file_TextLines = append(current_file_TextLines[2:], current_file_TextLines[0])
+            }else if current_index == len(current_file_TextLines) - 2 {
+                current_file_TextLines = append(current_file_TextLines[:current_index-1], current_file_TextLines[len(current_file_TextLines)-1])
+            }else {
+                current_file_TextLines = append(current_file_TextLines[:current_index-1], current_file_TextLines[current_index+1:]...)
             }
         }else {
             previous_packages_left = append(previous_packages_left, package_full_name)
