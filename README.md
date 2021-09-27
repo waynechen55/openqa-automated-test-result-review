@@ -23,7 +23,7 @@ https://openqa.opensuse.org/tests/overview?distri=microos&version=Tumbleweed&bui
 Use golang to do SLES builds comparison to achieve faster speed. This golang script is called inside by openqa-review-result.py by using os.system. User can use openqa-review-result.py with "-c" option to use this feature.
 ## v4.1
 Initialize comp_str to false at the beginning.
-## v4.1
+## v4.2
 Fix complex patterns matching and slices appending issues.
 
 # Future Development
